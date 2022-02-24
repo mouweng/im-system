@@ -104,3 +104,20 @@ nc 127.0.0.1 8888
 你已超时，程序关闭...
 ```
 
+## 版本V8-私聊功能
+- 构建服务
+```shell
+go build -o server main.go server.go user.go
+./server
+```
+- 测试
+```shell
+nc 127.0.0.1 8888
+rename|yifanweng
+to|wyf|hello
+```
+```shell
+nc 127.0.0.1 8888
+rename|wyf
+to|yifanweng|hi
+```

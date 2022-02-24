@@ -8,7 +8,7 @@ import (
 type User struct {
 	Name string
 	Addr string
-	C chan string
+	C    chan string
 	conn net.Conn
 
 	server *Server
@@ -18,10 +18,10 @@ type User struct {
 func NewUser(conn net.Conn, server *Server) *User {
 	userAddr := conn.RemoteAddr().String()
 	user := &User{
-		Name: userAddr,
-		Addr: userAddr,
-		C: make(chan string),
-		conn: conn,
+		Name:   userAddr,
+		Addr:   userAddr,
+		C:      make(chan string),
+		conn:   conn,
 		server: server,
 	}
 	// 启动监听user
@@ -61,11 +61,11 @@ func (this *User) DoMessage(msg string) {
 		// 查询当前在线用户
 		this.server.mapLock.Lock()
 		for _, user := range this.server.OnlineMap {
-			OnlineMsg := "[" + user.Addr +  "]" + user.Name + ":" + "在线...\n"
+			OnlineMsg := "[" + user.Addr + "]" + user.Name + ":" + "在线...\n"
 			this.SendMsg(OnlineMsg)
 		}
 		this.server.mapLock.Unlock()
-	} else if len(msg) > 7 && msg[:7]== "rename|" {
+	} else if len(msg) > 7 && msg[:7] == "rename|" {
 		// 消息格式 rename|张三
 		newName := strings.Split(msg, "|")[1]
 		// 判断name是否存在
@@ -81,16 +81,40 @@ func (this *User) DoMessage(msg string) {
 			this.Name = newName
 			this.SendMsg("您已经更新用户名: " + this.Name + "\n")
 		}
+	} else if len(msg) > 4 && msg[:3] == "to|" {
+		if len(strings.Split(msg, "|")) < 3 {
+			this.SendMsg("消息格式不正确\n")
+			return
+		}
+		// 消息格式: to|张三|消息内容
+		// 1 获取对方用户名
+		remoteName := strings.Split(msg, "|")[1]
+		if remoteName == "" {
+			this.SendMsg("无用户名内容\n")
+			return
+		}
+		// 2 根据用户名得到对方的user对象
+		remoteUser, ok := this.server.OnlineMap[remoteName]
+		if !ok {
+			this.SendMsg("该用户不存在\n")
+			return
+		}
+		// 3 获取消息内容，通过对方的user对象发送消息
+		content := strings.Split(msg, "|")[2]
+		if content == "" {
+			this.SendMsg("无消息内容\n")
+			return
+		}
+		remoteUser.SendMsg(this.Name + " 对您说 :" + content + "\n")
 	} else {
 		this.server.BroadCast(this, msg)
 	}
 }
 
-
 // 监听当前User，一旦有消息，直接发送给客户端
 func (this *User) ListenMessage() {
 	for {
-		msg := <- this.C
+		msg := <-this.C
 		this.conn.Write([]byte(msg + "\n"))
 	}
 }
