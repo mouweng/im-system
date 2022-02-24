@@ -89,3 +89,18 @@ who
 rename|yifanweng
 who
 ```
+
+## 版本V7-超时强踢功能
+- 构建服务
+```shell
+go build -o server main.go server.go user.go
+./server
+```
+- 测试
+```shell
+nc 127.0.0.1 8888
+
+[127.0.0.1:52282]127.0.0.1:52282:已上线
+你已超时，程序关闭...
+```
+
