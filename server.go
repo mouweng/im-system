@@ -11,11 +11,10 @@ import (
 type Server struct {
 	IP string
 	Port int
-
 	// 在线用户列表
 	OnlineMap map[string]*User
+	// 锁
 	mapLock sync.RWMutex
-
 	// 消息广播channel
 	Message chan string
 }
@@ -31,6 +30,7 @@ func NewServer(ip string, port int) *Server {
 	return server
 }
 
+// 服务端监听消息
 func (this *Server) ListenMessager() {
 	for {
 		msg := <- this.Message
@@ -42,17 +42,17 @@ func (this *Server) ListenMessager() {
 	}
 }
 
+// 广播用户消息
 func (this *Server) BroadCast(user *User, msg string) {
 	sendMsg := "[" + user.Addr + "]" + user.Name + ":" + msg
 	this.Message <- sendMsg
 }
 
+// 业务入口
 func (this *Server) Handler(conn net.Conn) {
 	// 当前用户上线, 将用户加入onlineMap
 	user := NewUser(conn, this)
-
 	user.Online()
-
 	isLive := make(chan bool)
 
 	// 接受客户端发送的消息
@@ -70,14 +70,12 @@ func (this *Server) Handler(conn net.Conn) {
 			}
 			// 提取用户消息(去除'\n')
 			msg := string(buf[:n - 1])
-
 			// 针对message进行消息处理
 			user.DoMessage(msg)
-
 			isLive <- true
 		}
 	}()
-
+	
 	for {
 		select{
 		case <- isLive :

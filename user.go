@@ -9,8 +9,9 @@ type User struct {
 	Name string
 	Addr string
 	C    chan string
+	// 网络连接
 	conn net.Conn
-
+	// 指向服务端的指针
 	server *Server
 }
 
@@ -56,6 +57,7 @@ func (this *User) SendMsg(msg string) {
 	this.conn.Write([]byte(msg))
 }
 
+// 处理消息
 func (this *User) DoMessage(msg string) {
 	if msg == "who" {
 		// 查询当前在线用户

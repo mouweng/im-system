@@ -76,8 +76,6 @@ func (client *Client) PublicChat() {
 		fmt.Println(">>>请输入聊天内容，exit退出>>>")
 		fmt.Scanln(&chatMsg)
 	}
-	// 发给服务器
-
 }
 
 func (client *Client) SelectUsers() {
