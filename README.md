@@ -121,3 +121,14 @@ nc 127.0.0.1 8888
 rename|wyf
 to|yifanweng|hi
 ```
+
+## 版本V9-新增客户端功能
+- 构建服务
+```shell
+go build -o server main.go server.go user.go
+./server
+```
+```shell
+go build -o client client.go
+./client -ip 127.0.0.1 -port 8888
+```
